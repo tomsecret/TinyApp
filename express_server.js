@@ -53,7 +53,19 @@ app.post("/urls", (req, res) => {
   console.log(random);
   urlDatabase[random] = result.longURL;
   res.redirect('http://localhost:8080/urls/' + random)
+});
 
+app.post("/urls/:id/delete", (req, res) => {
+  console.log(req.params.id)
+  delete urlDatabase[req.params.id]
+  res.redirect('/urls')
+});
+
+app.post("/urls/:id/update", (req, res) => {
+  console.log(req.params.id)
+  result = req.body
+  urlDatabase[req.params.id] = result.longURL
+  res.redirect('/urls')
 });
 
 app.get("/u/:shortURL", (req, res) => {

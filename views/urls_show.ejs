@@ -3,14 +3,10 @@
 <%- include ./partials/_header.ejs %>
 <body>
     <!-- Add your EJS code here -->
-  <table>
-    <tr>
-      <td>ID</td>
-      <td>URL</td>
-    <tr>
-     <td><%= shortURL %></td>
-     <td><a href=urls[shortURL]><%= urls[shortURL] %></a></td>
-    </tr>
-  </table>
+    <form action="/urls/<%= shortURL %>/update" method="POST" style="margin:150px;">
+      <%= shortURL %>
+      <input id="longURL" type="text" name="longURL" value="<%= urls[shortURL] %>"  style="width: 300px">
+      <input type="submit" value="Update">
+    </form>
 </body>
 </html>

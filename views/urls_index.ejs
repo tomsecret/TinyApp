@@ -4,16 +4,13 @@
 <body>
     <!-- Add your EJS code here -->
 <!--   <%- JSON.stringify(urls) %> -->
-  <table>
-    <tr>
-      <td>ID</td>
-      <td>URL</td>
   <% for (var key in urls) { %>
-    <tr>
-     <td><%= key %></td>
-     <td><a href=urls[key]><%= urls[key] %></a></td>
-    </tr>
+    <form method="POST" action="/urls/<%= key %>/delete">
+     <ul><%= key %></ul>
+     <ul><a href=<%= urls[key] %>><%= urls[key] %></a></ul>
+     <input type="submit" value="delete">
+    </form>
   <% } %>
-  </table>
+
 </body>
 </html>
