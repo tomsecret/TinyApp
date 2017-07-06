@@ -76,18 +76,6 @@ function findEmail(value, object) {
   }
 }
 
-// function findEmailandPassword(value, password, object) {
-//   for (var key in object) {
-//     if (object[key]['email'] === value) {
-//       if (object[key]['password'] === password) {
-//         return true
-//       }
-//     }
-//   }
-// }
-
-
-
 ////// get key by value //////
 function getKeyByValue(value, object) {
   for (var key in object) {
@@ -107,7 +95,12 @@ function getPasswordByEmail(value, object) {
 
 /////////original code //////////////////
 app.get("/", (req, res) => {
-  res.end("Hello!");
+  if (!req.session.user_ID) {
+    res.redirect('/login')
+  }
+  else {
+    res.redirect('/urls')
+  }
 });
 
 app.get("/urls.json", (req, res) => {
@@ -139,9 +132,8 @@ app.get("/urls/new", (req, res) => {
 /////////the most complicated part////////
 
 
-app.post("/urls", (req, res) => {  // debug statement to see POST parameters
+app.post("/urls", (req, res) => {
   result = req.body
-  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
   random = generateRandomString();
   urlDatabase[random] = {url: result.longURL, userID: req.session.user_ID}
   res.redirect('http://localhost:8080/urls/' + random)
@@ -155,22 +147,23 @@ app.post("/urls/:id/delete", (req, res) => {
   else {
     res.send('access denied')
   }
-  // console.log(req.params.id)
-  // delete urlDatabase[req.params.id]
-  // res.redirect('/urls')
 });
 
 app.post("/urls/:id/update", (req, res) => {
   console.log(req.params.id)
   result = req.body
-  urlDatabase[req.params.id] = result.longURL
+  urlDatabase[req.params.id]['url'] = result.longURL
   res.redirect('/urls')
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  // let longURL = ...
-  longURL = urlDatabase[req.params.shortURL]['url']
-  res.redirect(longURL);
+  if (urlDatabase[req.params.shortURL]) {
+    longURL = urlDatabase[req.params.shortURL]['url']
+    res.redirect(longURL);
+  }
+  else {
+    res.send('Shortened URL not exits')
+  }
 });
 
 //// add login endpoint /////
@@ -180,7 +173,6 @@ app.post("/login", (req, res) => {
     if (bcrypt.compareSync(req.body.password, hashed_password)) {
       tempID = getKeyByValue(req.body.email, users)
       req.session.user_ID = tempID;
-      // res.cookie('user_ID', tempID)
       res.redirect('/urls')
     }
     else {
@@ -229,18 +221,22 @@ app.post("/register", (req, res) => {
   users[tempID] = {id: tempID, email: req.body.email, password: hashed_password};
   req.session.user_ID = tempID;
   res.redirect('/urls')
-  // console.log(users)
 }
 
 });
 
 app.get("/urls/:id", (req, res) => {
-  if (req.session.user_ID === urlDatabase[req.params.id]['userID']) {
-    let templateVars = { shortURL: req.params.id, urls: urlDatabase, username: req.session.user_ID};
-    res.render("urls_show", templateVars)
+  if (!urlDatabase[req.params.id]) {
+    res.send('Shortened URL not exits')
   }
   else {
-    res.send('access denied')
+    if (req.session.user_ID === urlDatabase[req.params.id]['userID']) {
+    let templateVars = { shortURL: req.params.id, urls: urlDatabase, username: req.session.user_ID};
+    res.render("urls_show", templateVars)
+    }
+    else {
+      res.send('access denied')
+    }
   }
 });
 
