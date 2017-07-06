@@ -5,14 +5,16 @@
     <!-- Add your EJS code here -->
 <!--   <%- JSON.stringify(urls) %> -->
   <% for (var key in urls) { %>
-    <form method="POST" action="/urls/<%= key %>/delete">
-    <ul><%= key %></ul>
-    <ul><a href=<%= urls[key] %>><%= urls[key] %></a></ul>
-    <input type="submit" value="Delete">
-    </form>
-    <form action="/urls/<%= key %>/">
-    <input type="submit" value="Edit" />
-    </form>
+    <% if (urls[key]['userID'] === username) { %>
+      <form method="POST" action="/urls/<%= key %>/delete">
+      <ul><%= key %></ul>
+      <ul><a href=<%= urls[key]['url'] %>><%= urls[key]['url'] %></a></ul>
+      <input type="submit" value="Delete">
+      </form>
+      <form action="/urls/<%= key %>/">
+      <input type="submit" value="Edit" />
+      </form>
+    <% } %>
   <% } %>
 
 </body>

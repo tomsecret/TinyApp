@@ -11,22 +11,29 @@ app.set("view engine", "ejs");
 
 ///// url ////////
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    url: "http://www.lighthouselabs.ca",
+    userID: "admin"
+  },
+  "9sm5xK": {
+    url: "http://www.google.com",
+    userID: "admin"
+  }
 };
+
 
 ///// user register/////
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+  "admin": {
+    id: "admin",
+    email: "admin@admin.com",
+    password: "123"
   },
- "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
+ "guest": {
+    id: "guest",
+    email: "guest@guest.com",
+    password: "123"
   }
 }
 /////generate string////
@@ -105,23 +112,38 @@ app.get("/urls", (req, res) => {
 
 ///// urls new /////
 app.get("/urls/new", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["user_ID"]}
-  res.render("urls_new", templateVars);
+  if (!req.cookies["user_ID"]) {
+    res.redirect('/login')
+  }
+  else {let templateVars = { urls: urlDatabase, username: req.cookies["user_ID"]}
+  res.render("urls_new", templateVars)
+  };
 });
+
+/////////the most complicated part////////
+
 
 app.post("/urls", (req, res) => {  // debug statement to see POST parameters
   result = req.body
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
   random = generateRandomString();
-  console.log(random);
-  urlDatabase[random] = result.longURL;
+  urlDatabase[random] = {url: result.longURL, userID: req.cookies["user_ID"]}
+  // urlDatabase[random]['url'] = result.longURL;
+  // urlDatabase[random]['userID'] = req.cookies["user_ID"];
   res.redirect('http://localhost:8080/urls/' + random)
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  console.log(req.params.id)
-  delete urlDatabase[req.params.id]
-  res.redirect('/urls')
+    if (req.cookies["user_ID"] === urlDatabase[req.params.id]['userID']) {
+    delete urlDatabase[req.params.id]
+    res.redirect('/urls')
+  }
+  else {
+    res.send('access denied')
+  }
+  // console.log(req.params.id)
+  // delete urlDatabase[req.params.id]
+  // res.redirect('/urls')
 });
 
 app.post("/urls/:id/update", (req, res) => {
@@ -133,7 +155,7 @@ app.post("/urls/:id/update", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   // let longURL = ...
-  longURL = urlDatabase[req.params.shortURL]
+  longURL = urlDatabase[req.params.shortURL]['url']
   res.redirect(longURL);
 });
 
@@ -194,8 +216,13 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id, urls: urlDatabase};
-  res.render("urls_show", templateVars);
+  if (req.cookies["user_ID"] === urlDatabase[req.params.id]['userID']) {
+    let templateVars = { shortURL: req.params.id, urls: urlDatabase, username: req.cookies["user_ID"]};
+    res.render("urls_show", templateVars)
+  }
+  else {
+    res.send('access denied')
+  }
 });
 
 
