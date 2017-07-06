@@ -200,7 +200,7 @@ app.get("/login", (req, res) => {
 //// add logout /////
 
 app.post("/logout", (end, res) => {
-  res.clearCookie('user_ID')
+  res.clearCookie('session')
   res.redirect('/urls')
 })
 
