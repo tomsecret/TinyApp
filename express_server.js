@@ -3,7 +3,7 @@ var app = express();
 var PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
 var cookieParser = require('cookie-parser')
-
+const bcrypt = require('bcrypt');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -28,12 +28,12 @@ const users = {
   "admin": {
     id: "admin",
     email: "admin@admin.com",
-    password: "123"
+    password: bcrypt.hashSync('123', 10)
   },
  "guest": {
     id: "guest",
     email: "guest@guest.com",
-    password: "123"
+    password: bcrypt.hashSync('123', 10)
   }
 }
 /////generate string////
@@ -68,15 +68,15 @@ function findEmail(value, object) {
   }
 }
 
-function findEmailandPassword(value, password, object) {
-  for (var key in object) {
-    if (object[key]['email'] === value) {
-      if (object[key]['password'] === password) {
-        return true
-      }
-    }
-  }
-}
+// function findEmailandPassword(value, password, object) {
+//   for (var key in object) {
+//     if (object[key]['email'] === value) {
+//       if (object[key]['password'] === password) {
+//         return true
+//       }
+//     }
+//   }
+// }
 
 
 
@@ -85,6 +85,14 @@ function getKeyByValue(value, object) {
   for (var key in object) {
     if (object[key]['email'] === value) {
       return key;
+    }
+  }
+}
+
+function getPasswordByEmail(value, object) {
+  for (var key in object) {
+    if (object[key]['email'] === value) {
+      return object[key]['password'];
     }
   }
 }
@@ -162,7 +170,8 @@ app.get("/u/:shortURL", (req, res) => {
 //// add login endpoint /////
 app.post("/login", (req, res) => {
   if (findEmail(req.body.email, users)) {
-    if (findEmailandPassword(req.body.email, req.body.password, users)) {
+    var hashed_password = getPasswordByEmail(req.body.email, users)
+    if (bcrypt.compareSync(req.body.password, hashed_password)) {
       tempID = getKeyByValue(req.body.email, users)
       res.cookie('user_ID', tempID)
       res.redirect('/urls')
@@ -209,9 +218,12 @@ app.post("/register", (req, res) => {
   }
 
   else {
-  users[tempID] = {id: tempID, email: req.body.email, password: req.body.password};
+  var hashed_password = bcrypt.hashSync(req.body.password, 10);
+  users[tempID] = {id: tempID, email: req.body.email, password: hashed_password};
   res.cookie('user_ID', tempID)
-  res.redirect('/urls')}
+  res.redirect('/urls')
+  // console.log(users)
+}
 
 });
 
