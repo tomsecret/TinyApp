@@ -12,12 +12,11 @@ app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
   keys: ['covfefe'],
-
-  // Cookie Options
+// Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }))
 
-///// url ////////
+///// url database////////
 var urlDatabase = {
   "b2xVn2": {
     url: "http://www.lighthouselabs.ca",
@@ -44,7 +43,7 @@ const users = {
     password: bcrypt.hashSync('123', 10)
   }
 }
-/////generate string////
+/////function to generate string////
 function generateRandomString() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -55,7 +54,7 @@ function generateRandomString() {
   return text;
 };
 
-/////find value in object////////
+/////check if a value is present in object////////
 
 function findValue(value, object) {
   for (var i in object) {
@@ -67,7 +66,7 @@ function findValue(value, object) {
   }
 }
 
-///////find email and check if password matches function/////
+///////check if a email exist in the target object/////
 function findEmail(value, object) {
   for (var key in object) {
     if (object[key]['email'] === value) {
@@ -76,7 +75,7 @@ function findEmail(value, object) {
   }
 }
 
-////// get key by value //////
+////// get key with a given email //////
 function getKeyByValue(value, object) {
   for (var key in object) {
     if (object[key]['email'] === value) {
@@ -84,6 +83,8 @@ function getKeyByValue(value, object) {
     }
   }
 }
+
+///////get password with a given email/////
 
 function getPasswordByEmail(value, object) {
   for (var key in object) {
@@ -93,7 +94,7 @@ function getPasswordByEmail(value, object) {
   }
 }
 
-/////////original code //////////////////
+/////////home page //////////////////
 app.get("/", (req, res) => {
   if (!req.session.user_ID) {
     res.redirect('/login')
@@ -129,7 +130,7 @@ app.get("/urls/new", (req, res) => {
   };
 });
 
-/////////the most complicated part////////
+/////////post to urls////////
 
 
 app.post("/urls", (req, res) => {
@@ -138,6 +139,8 @@ app.post("/urls", (req, res) => {
   urlDatabase[random] = {url: result.longURL, userID: req.session.user_ID}
   res.redirect('http://localhost:8080/urls/' + random)
 });
+
+//////post to delete urls//////
 
 app.post("/urls/:id/delete", (req, res) => {
     if (req.session.user_ID === urlDatabase[req.params.id]['userID']) {
@@ -149,12 +152,16 @@ app.post("/urls/:id/delete", (req, res) => {
   }
 });
 
+/////post to update url//////
+
 app.post("/urls/:id/update", (req, res) => {
   console.log(req.params.id)
   result = req.body
   urlDatabase[req.params.id]['url'] = result.longURL
   res.redirect('/urls')
 });
+
+//////redirect to long URL with short URL//////
 
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
@@ -185,10 +192,13 @@ app.post("/login", (req, res) => {
   }
 })
 
+/////login page/////
+
 app.get("/login", (req, res) => {
   let templateVars = { urls: urlDatabase, username: req.session.user_ID}
   res.render("urls_login", templateVars)
 })
+
 //// add logout /////
 
 app.post("/logout", (end, res) => {
@@ -224,6 +234,7 @@ app.post("/register", (req, res) => {
 }
 
 });
+
 
 app.get("/urls/:id", (req, res) => {
   if (!urlDatabase[req.params.id]) {
