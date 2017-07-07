@@ -4,8 +4,8 @@ The app will allow users to shorten long URLs much like TinyURL.com and bit.ly d
 
 ## Final Product
 
-!["Screenshot of URLs page"]()
-!["Screenshot of register page"]()
+!["Screenshot of URLs page"]()(https://github.com/tomsecret/TinyApp/blob/master/docs/urls-page.png)
+!["Screenshot of new URL page"](https://github.com/tomsecret/TinyApp/blob/master/docs/newURL-page.png)
 
 
 
