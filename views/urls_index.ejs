@@ -2,8 +2,6 @@
 <html lang="en">
 <%- include ./partials/_header.ejs %>
 <body>
-    <!-- Add your EJS code here -->
-<!--   <%- JSON.stringify(urls) %> -->
   <% for (var key in urls) { %>
     <% if (urls[key]['userID'] === username) { %>
       <form method="POST" action="/urls/<%= key %>/delete">
@@ -16,6 +14,5 @@
       </form>
     <% } %>
   <% } %>
-
 </body>
 </html>
